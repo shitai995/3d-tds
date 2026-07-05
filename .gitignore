@@ -1,0 +1,55 @@
+# Unity核心缓存（必忽略，体积巨大）
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+GIStagingCache/
+Autosaves/
+Lightmap-*
+
+# PackageManager本地锁文件
+Packages/packages-lock.json
+
+# 商店插件缓存
+Assets/AssetStoreTools*
+Assets/Plugins/Editor/JetBrains*
+
+# 编辑器IDE缓存
+.vs/
+.vscode/
+.idea/
+
+# 自动生成C#工程文件
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.pdb
+*.pidb.meta
+*.pdb.meta
+sysinfo.txt
+
+# 临时备份文件
+Assets/**/*~
+Assets/**/*.bak
+
+# 打包输出产物
+*.apk
+*.unitypackage
+*.exe
+*.zip
+Build/Windows/
+Build/Windows64/
+
+# 系统隐藏垃圾文件
+.DS_Store
+Thumbs.db
+desktop.ini
