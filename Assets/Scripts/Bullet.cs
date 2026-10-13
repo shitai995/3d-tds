@@ -18,7 +18,7 @@ public class Bullet : MonoBehaviour
     {
         CreateImpactFx(collision);
         //rb.constraints = RigidbodyConstraints.FreezeAll;
-        Destroy(gameObject);
+        ObjectPool.instance.ReturnBullet(gameObject);
     }
 
     private void CreateImpactFx(Collision collision)

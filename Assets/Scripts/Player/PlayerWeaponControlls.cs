@@ -14,11 +14,12 @@ public class PlayerWeaponControlls : MonoBehaviour
     private const float REFERENCE_BULLET_SPEED = 20;
 
     [SerializeField] private Weapon currentWeapon;
+    private bool weaponReady;
+    private bool isShooting;
 
     [Header("Bullet details")]
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private float bulletSpeed;
-    [SerializeField] private Transform gunPoint;
 
     [SerializeField] private Transform weaponHolder;
 
@@ -30,14 +31,22 @@ public class PlayerWeaponControlls : MonoBehaviour
         player = GetComponent<Player>();
         AssignInputEvents();
 
-        currentWeapon.bulletsInMagazine = currentWeapon.totalReserveAmmo;
+        Invoke("EquipStartingWeapon", .1f);
     }
-
-    #region Slots managment
-
-    private void EquipWeapon(int i)
+    private void Update()
     {
+        if(isShooting)
+            Shoot();
+    }
+    #region Slots managment - Picjup\Equip\Drop\Ready Weapon
+
+    private void EquipStartingWeapon() => EquipWeapon(0);
+    private void EquipWeapon(int i) 
+    {
+        SetWeaponReady(false);
+
         currentWeapon = weaponSlots[i];
+        player.weaponVisuals.PlayWeaponEquipAnimation();
     }
     public void PickupWeapon(Weapon newWeapon)
     {
@@ -45,39 +54,52 @@ public class PlayerWeaponControlls : MonoBehaviour
             return;
 
         weaponSlots.Add(newWeapon);
+        player.weaponVisuals.SwitchOnBackupWeaponModel();
     }
     private void DropWeapon()
     {
-        if (weaponSlots.Count <= 1)
+        if (HasOnlyWeapon())
             return;
 
         weaponSlots.Remove(currentWeapon);
-
-        currentWeapon = weaponSlots[0];
+        EquipWeapon(0);
     }
-
+    public void SetWeaponReady(bool ready) => weaponReady = ready;  
+    public bool WeaponReady() => weaponReady;
     #endregion
     private void Shoot()
     {
+        if(WeaponReady() == false)
+            return;
         if (currentWeapon.CanShoot() == false)
             return;
+        if(currentWeapon.shootType == ShootType.Single)
+            isShooting = false;
 
-        GameObject newBullet =
-            Instantiate(bulletPrefab, gunPoint.position, Quaternion.LookRotation(gunPoint.forward));
+        GameObject newBullet = ObjectPool.instance.GetBullet();
+
+        newBullet.transform.position = GunPoint().position;
+        newBullet.transform.rotation = Quaternion.LookRotation(GunPoint().forward);
 
         Rigidbody rbNewBullet = newBullet.GetComponent<Rigidbody>();
 
-        rbNewBullet.mass = REFERENCE_BULLET_SPEED / bulletSpeed;
-        rbNewBullet.velocity = BulletDirection() * bulletSpeed;
+        Vector3 bulletDirection = currentWeapon.ApplySpread(BulletDirection());
 
-        Destroy(newBullet, 10);
-        GetComponentInChildren<Animator>().SetTrigger("Fire");
+        rbNewBullet.mass = REFERENCE_BULLET_SPEED / bulletSpeed;
+        rbNewBullet.velocity = bulletDirection * bulletSpeed;
+
+        player.weaponVisuals.PlayerFireAnimation();
+    }
+    private void Reolad()
+    {
+        SetWeaponReady(false);
+        player.weaponVisuals.PlayReloadAnimation();
     }
     public Vector3 BulletDirection()
     {
         Transform aim = player.aim.Aim();
 
-        Vector3 direction = (aim.position - gunPoint.position).normalized;
+        Vector3 direction = (aim.position - GunPoint().position).normalized;
 
         if (player.aim.CanAimPrecisly() == false && player.aim.Target() == null)
             direction.y = 0;
@@ -87,14 +109,25 @@ public class PlayerWeaponControlls : MonoBehaviour
 
         return direction;
     }
+    public bool HasOnlyWeapon() => weaponSlots.Count <= 1;
     public Weapon CurrentWeapon() => currentWeapon;
-    public Transform GunPoint() => gunPoint;
+    public Weapon BackupWeapon()
+    {
+        foreach(Weapon weapon in weaponSlots)
+        {
+            if (weapon != currentWeapon)
+                return weapon;
+        }
+        return null;
+    }
+    public Transform GunPoint() => player.weaponVisuals.CurrentWeaponModel().gunPoint;
 
     #region Input Events
     private void AssignInputEvents()
     {
         PlayerControlls controls = player.controls;
-        controls.Character.Fire.performed += ctx => Shoot();
+        controls.Character.Fire.performed += ctx => isShooting = true;
+        controls.Character.Fire.canceled += ctx => isShooting = false;
 
         controls.Character.EquipSlot1.performed += ctx => EquipWeapon(0);
         controls.Character.EquipSlot2.performed += ctx => EquipWeapon(1);
@@ -103,10 +136,14 @@ public class PlayerWeaponControlls : MonoBehaviour
 
         controls.Character.Reload.performed += ctx =>
         {
-            if (currentWeapon.CanReload())
-                player.weaponVisuals.PlayReloadAnimation();
+            if (currentWeapon.CanReload() && WeaponReady())
+            {
+                Reolad();
+            }
         };
     }
+
+      
     #endregion
-     
+
 }

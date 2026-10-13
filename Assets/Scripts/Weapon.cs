@@ -4,7 +4,9 @@
 // 版本：V1.1
 // 描述：
 // ========================================================
-public enum WeaponType 
+using UnityEngine;
+
+public enum WeaponType
 {
     Pistol,
     Revolver,
@@ -12,24 +14,68 @@ public enum WeaponType
     Shotgun,
     Rifle
 }
-
+public enum ShootType
+{
+    Single,
+    Auto
+}
 
 [System.Serializable]
 public class Weapon
 {
     public WeaponType weaponType;
 
+    [Header("Shooting apesifics")]
+    public ShootType shootType;
+    public float fireRate = 1;
+    private float lastShotTime;
+
+    [Header("Magazine details")]
     public int bulletsInMagazine;
     public int magazineCapacity;
     public int totalReserveAmmo;
 
+    [Range(1, 5)]
+    public float reloadSpeed = 1;
+    [Range(1, 5)]
+    public float equipmentSpeed = 1;
+
+    [Header("Spread ")]
+    public float baseSpread = 1;
+    public float maximumSpread = 3;
+    private float currentSpread = 2;
+
+    public float spreadIncreaseRate = .15f;
+
+    private float lastSpreadUpdateTime;
+    private float spreadCooldown = 1f;
+
+    #region Spread methods
+    public Vector3 ApplySpread(Vector3 originalDirection)
+    {
+        UpdateSpread();
+        float randomizedValue = Random.Range(-currentSpread, currentSpread);
+
+        Quaternion spreadRotation = Quaternion.Euler(randomizedValue, randomizedValue, randomizedValue);
+
+        return spreadRotation * originalDirection;
+    }
+    private void UpdateSpread()
+    {
+        if (Time.time > lastSpreadUpdateTime + spreadCooldown)
+            currentSpread = baseSpread;
+        else
+            IncreaseSpread();
+        lastSpreadUpdateTime = Time.time;
+    }
+    private void IncreaseSpread()
+    {
+        currentSpread = Mathf.Clamp(currentSpread + spreadIncreaseRate, baseSpread, maximumSpread);
+    }
+    #endregion
     public bool CanShoot()
     {
-        return HaveEnoughBullets();
-    }
-    private bool HaveEnoughBullets()
-    {
-        if (bulletsInMagazine > 0)
+        if (HaveEnoughBullets() && ReadToFire())
         {
             bulletsInMagazine--;
             return true;
@@ -37,28 +83,41 @@ public class Weapon
         return false;
     }
 
+    private bool ReadToFire()
+    {
+        if (Time.time > lastShotTime + 1 / fireRate)
+        {
+            lastShotTime = Time.time;
+            return true;
+        }
+        return false;
+    }
+
+
+    #region Reload methods
     public bool CanReload()
     {
         if (bulletsInMagazine == magazineCapacity)
             return false;
 
-        if(totalReserveAmmo>0)
+        if (totalReserveAmmo > 0)
             return true;
 
         return false;
     }
-
     public void RefillBullets()
     {
         int bulletToReload = magazineCapacity;
 
-        if(bulletToReload > totalReserveAmmo) 
+        if (bulletToReload > totalReserveAmmo)
             bulletToReload = totalReserveAmmo;
 
         totalReserveAmmo -= bulletToReload;
         bulletsInMagazine = bulletToReload;
 
-        if(totalReserveAmmo < 0)
+        if (totalReserveAmmo < 0)
             totalReserveAmmo = 0;
     }
+    private bool HaveEnoughBullets() => bulletsInMagazine > 0;
+    #endregion
 }
