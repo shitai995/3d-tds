@@ -147,6 +147,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c30bce0e0d30e124a892c287e0ffb5b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cd: {fileID: 721184347906192026}
+  rb: {fileID: 8741269587079187267}
+  meshRenderer: {fileID: 6971146604094689354}
+  trailRenderer: {fileID: 7992062857567506080}
   bulletImpactFx: {fileID: 743425469604057078, guid: 5550ef6ec57bc2c4f824e0974b308896, type: 3}
 --- !u!96 &7992062857567506080
 TrailRenderer:
@@ -190,7 +194,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 0.3
+  m_Time: 0.25
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3

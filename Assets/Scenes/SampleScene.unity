@@ -2870,12 +2870,20 @@ MonoBehaviour:
   currentWeapon:
     weaponType: 0
     shootType: 0
+    bulletsPerShot: 3
+    defaultFireRate: 0
     fireRate: 1
+    burstAvalible: 0
+    burstActive: 0
+    burstBulletsPerShot: 0
+    burstFireRate: 0
+    burstFireDelay: 0.1
     bulletsInMagazine: 0
     magazineCapacity: 0
     totalReserveAmmo: 0
     reloadSpeed: 1
     equipmentSpeed: 1
+    gunDistance: 4
     baseSpread: 0
     maximumSpread: 3
     spreadIncreaseRate: 0.15
@@ -2884,27 +2892,43 @@ MonoBehaviour:
   weaponHolder: {fileID: 1475745857}
   maxSlots: 2
   weaponSlots:
-  - weaponType: 0
-    shootType: 0
-    fireRate: 3
+  - weaponType: 2
+    shootType: 1
+    bulletsPerShot: 3
+    defaultFireRate: 10
+    fireRate: 10
+    burstAvalible: 1
+    burstActive: 0
+    burstBulletsPerShot: 3
+    burstFireRate: 1.5
+    burstFireDelay: 0.1
     bulletsInMagazine: 100
     magazineCapacity: 50
     totalReserveAmmo: 99999
     reloadSpeed: 1
     equipmentSpeed: 1
+    gunDistance: 6
     baseSpread: 1
     maximumSpread: 1.5
     spreadIncreaseRate: 0.15
-  - weaponType: 4
+  - weaponType: 3
     shootType: 0
-    fireRate: 10
+    bulletsPerShot: 5
+    defaultFireRate: 1
+    fireRate: 1
+    burstAvalible: 0
+    burstActive: 0
+    burstBulletsPerShot: 0
+    burstFireRate: 0
+    burstFireDelay: 0
     bulletsInMagazine: 100
     magazineCapacity: 50
     totalReserveAmmo: 5000
     reloadSpeed: 1
     equipmentSpeed: 1
-    baseSpread: 1
-    maximumSpread: 0
+    gunDistance: 2.5
+    baseSpread: 15
+    maximumSpread: 15
     spreadIncreaseRate: 0.15
 --- !u!114 &1214912897
 MonoBehaviour:
@@ -3428,12 +3452,20 @@ MonoBehaviour:
   weapon:
     weaponType: 2
     shootType: 0
+    bulletsPerShot: 0
+    defaultFireRate: 0
     fireRate: 1
+    burstAvalible: 0
+    burstActive: 0
+    burstBulletsPerShot: 0
+    burstFireRate: 0
+    burstFireDelay: 0.1
     bulletsInMagazine: 0
     magazineCapacity: 0
     totalReserveAmmo: 0
     reloadSpeed: 1
     equipmentSpeed: 1
+    gunDistance: 4
     baseSpread: 0
     maximumSpread: 3
     spreadIncreaseRate: 0.15

@@ -5,6 +5,7 @@
 // 描述：
 // ========================================================
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,13 +36,16 @@ public class PlayerWeaponControlls : MonoBehaviour
     }
     private void Update()
     {
-        if(isShooting)
+        if (isShooting)
             Shoot();
+
+        if (Input.GetKeyDown(KeyCode.T))
+            currentWeapon.ToggleBurst();
     }
     #region Slots managment - Picjup\Equip\Drop\Ready Weapon
 
     private void EquipStartingWeapon() => EquipWeapon(0);
-    private void EquipWeapon(int i) 
+    private void EquipWeapon(int i)
     {
         SetWeaponReady(false);
 
@@ -64,17 +68,49 @@ public class PlayerWeaponControlls : MonoBehaviour
         weaponSlots.Remove(currentWeapon);
         EquipWeapon(0);
     }
-    public void SetWeaponReady(bool ready) => weaponReady = ready;  
+    public void SetWeaponReady(bool ready) => weaponReady = ready;
     public bool WeaponReady() => weaponReady;
     #endregion
+
+    private IEnumerator BurstFire()
+    {
+        SetWeaponReady(false);
+
+        for (int i = 1; i <= currentWeapon.bulletsPerShot; i++)
+        {
+            FireSingleBullet();
+
+            yield return new WaitForSeconds(currentWeapon.burstFireDelay);
+
+            if (i >= currentWeapon.bulletsPerShot)
+                SetWeaponReady(true);
+        }
+    }
     private void Shoot()
     {
-        if(WeaponReady() == false)
+        if (WeaponReady() == false)
             return;
         if (currentWeapon.CanShoot() == false)
             return;
-        if(currentWeapon.shootType == ShootType.Single)
+        player.weaponVisuals.PlayerFireAnimation();
+
+        if (currentWeapon.shootType == ShootType.Single)
             isShooting = false;
+
+        if (currentWeapon.BurstActivated() == true)
+        {
+            StartCoroutine(BurstFire());
+            return;
+        }
+
+
+        FireSingleBullet();
+
+    }
+
+    private void FireSingleBullet()
+    {
+        currentWeapon.bulletsInMagazine--;
 
         GameObject newBullet = ObjectPool.instance.GetBullet();
 
@@ -83,13 +119,15 @@ public class PlayerWeaponControlls : MonoBehaviour
 
         Rigidbody rbNewBullet = newBullet.GetComponent<Rigidbody>();
 
+        Bullet bulletScript = newBullet.GetComponent<Bullet>();
+        bulletScript.BulletSetup(currentWeapon.gunDistance);
+
         Vector3 bulletDirection = currentWeapon.ApplySpread(BulletDirection());
 
         rbNewBullet.mass = REFERENCE_BULLET_SPEED / bulletSpeed;
         rbNewBullet.velocity = bulletDirection * bulletSpeed;
-
-        player.weaponVisuals.PlayerFireAnimation();
     }
+
     private void Reolad()
     {
         SetWeaponReady(false);
@@ -113,7 +151,7 @@ public class PlayerWeaponControlls : MonoBehaviour
     public Weapon CurrentWeapon() => currentWeapon;
     public Weapon BackupWeapon()
     {
-        foreach(Weapon weapon in weaponSlots)
+        foreach (Weapon weapon in weaponSlots)
         {
             if (weapon != currentWeapon)
                 return weapon;
@@ -143,7 +181,7 @@ public class PlayerWeaponControlls : MonoBehaviour
         };
     }
 
-      
+
     #endregion
 
 }

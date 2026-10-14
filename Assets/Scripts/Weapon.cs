@@ -27,8 +27,18 @@ public class Weapon
 
     [Header("Shooting apesifics")]
     public ShootType shootType;
+    public int bulletsPerShot;
+    public float defaultFireRate;
     public float fireRate = 1;
     private float lastShotTime;
+
+    [Header("Burst fire")]
+    public bool burstAvalible;
+    public bool burstActive;
+
+    public int burstBulletsPerShot;
+    public float burstFireRate;
+    public float burstFireDelay = .1f;
 
     [Header("Magazine details")]
     public int bulletsInMagazine;
@@ -39,6 +49,8 @@ public class Weapon
     public float reloadSpeed = 1;
     [Range(1, 5)]
     public float equipmentSpeed = 1;
+    [Range(2, 12)]
+    public float gunDistance = 4;
 
     [Header("Spread ")]
     public float baseSpread = 1;
@@ -73,15 +85,41 @@ public class Weapon
         currentSpread = Mathf.Clamp(currentSpread + spreadIncreaseRate, baseSpread, maximumSpread);
     }
     #endregion
-    public bool CanShoot()
+
+    #region Burst methods
+
+    public bool BurstActivated()
     {
-        if (HaveEnoughBullets() && ReadToFire())
-        {
-            bulletsInMagazine--;
+        if(weaponType == WeaponType.Shotgun)
+        { 
+            burstFireDelay = 0;
             return true;
         }
-        return false;
+
+        return burstActive;
+    } 
+ 
+    public void ToggleBurst()
+    {
+        if (burstAvalible == false)
+            return;
+
+        burstActive = !burstActive;
+
+        if (burstActive)
+        {
+            bulletsPerShot = burstBulletsPerShot;
+            fireRate = burstFireRate;
+        }
+        else
+        {
+            bulletsPerShot = 1;
+            fireRate = defaultFireRate;
+        }
     }
+
+    #endregion
+    public bool CanShoot() => HaveEnoughBullets() && ReadToFire();
 
     private bool ReadToFire()
     {
